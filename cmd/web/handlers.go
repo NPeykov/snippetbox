@@ -49,6 +49,17 @@ func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
         app.clientError(w, http.StatusMethodNotAllowed)
         return
     }
-    w.Write([]byte("creating a new snippet"))
+
+    title := "Everybody is changing"
+    content := "People and time aswell are changing"
+    expires := 7
+
+    id, err := app.snippets.Insert(title, content, expires)
+
+    if err != nil {
+        app.serverError(w, err)
+    }
+
+    http.Redirect(w, r, fmt.Sprintf("/snippet/view?id=%d", id), http.StatusSeeOther)
 }
 
