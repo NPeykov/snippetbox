@@ -1,10 +1,13 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"html/template"
 	"net/http"
 	"strconv"
+
+	"github.com/NPeykov/snippetbox/internal/models"
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
@@ -40,7 +43,18 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
         app.notFound(w)
         return
     }
-    fmt.Fprintf(w, "viewing snippet with ID: %d", id)
+    s, err := app.snippets.Get(id)
+    
+    if err != nil {
+        if errors.Is(err, models.ErrNoRecord) {
+            app.notFound(w)
+        } else {
+            app.serverError(w, err)
+        }
+        return
+    }
+
+    fmt.Fprintf(w, "%v", s)
 }
 
 func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
