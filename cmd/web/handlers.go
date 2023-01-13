@@ -5,18 +5,17 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
-	"unicode/utf8"
 
 	"github.com/NPeykov/snippetbox/internal/models"
+	"github.com/NPeykov/snippetbox/internal/validator"
 	"github.com/julienschmidt/httprouter"
 )
 
 type snippetCreateForm struct {
-    Title string
-    Content string
-    Expires int
-    FieldErrors map[string]string
+    Title string        `form:"title"`
+    Content string      `form:"content"`
+    Expires int         `form:"expires"`
+    validator.Validator `form:"-"`
 }
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
@@ -71,33 +70,21 @@ func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request
         return
     }
 
-    expires, err := strconv.Atoi(r.PostForm.Get("expires"))
+    var form snippetCreateForm
+
+    err = app.decodePostForm(r, &form)
+
     if err != nil {
         app.clientError(w, http.StatusBadRequest)
         return
     }
-    form := snippetCreateForm {
-        Title : r.PostForm.Get("title"),
-        Content : r.PostForm.Get("content"),
-        Expires: expires,
-        FieldErrors: map[string]string{},
-    }
 
-    if strings.TrimSpace(form.Title) == "" {
-        form.FieldErrors["title"] = "This field cannot be empty"
-    } else if utf8.RuneCountInString(form.Title) > 100 {
-        form.FieldErrors["title"] = "This field cannot be more than 100 characters long"
-    }
+    form.CheckField(validator.NotBlank(form.Title), "title", "This field cannot be empty")
+    form.CheckField(validator.MaxChars(form.Title, 100), "title", "This field cannot be more than 100 characters long")
+    form.CheckField(validator.NotBlank(form.Content), "content", "This field cannot be empty")
+    form.CheckField(validator.PermittedInt(form.Expires, 1, 7, 365), "expires", "This field must be 1, 7 or 365")
 
-    if strings.TrimSpace(form.Content) == "" {
-        form.FieldErrors["content"] = "This field cannot be empty"
-    }
-
-    if expires != 1 && expires != 7 && expires != 365 {
-        form.FieldErrors["expires"] = "This field must be 1, 7 or 365"
-    }
-
-    if len(form.FieldErrors) > 0 {
+    if !form.Valid() {
         data := app.newTemplateData()
         data.Form = form
         app.render(w, http.StatusUnprocessableEntity, "create.tmpl.html", data)

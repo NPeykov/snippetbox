@@ -7,8 +7,12 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/NPeykov/snippetbox/internal/models"
+	"github.com/alexedwards/scs/mysqlstore"
+	"github.com/alexedwards/scs/v2"
+	"github.com/go-playground/form/v4"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -17,6 +21,8 @@ type application struct {
     errorLog *log.Logger
     snippets *models.SnippetModel
     templateCache map[string]*template.Template
+    formDecoder *form.Decoder
+    sessionManager *scs.SessionManager
 }
 
 func main() {
@@ -38,11 +44,19 @@ func main() {
         errorLog.Fatal(err)
     }
 
+    formDecoder := form.NewDecoder()
+
+    sessionManager := scs.New()
+    sessionManager.Store = mysqlstore.New(db)
+    sessionManager.Lifetime = 12 * time.Hour
+
     app := &application{
         infoLog: infoLog, 
         errorLog: errorLog,
         snippets: &models.SnippetModel{ DB: db },
         templateCache: tmplCache,
+        formDecoder: formDecoder,
+        sessionManager: sessionManager,
     }
 
     srv := &http.Server{
