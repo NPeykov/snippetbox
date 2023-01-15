@@ -111,12 +111,12 @@ func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
     w.Write([]byte("login post"))
 }
 
-func (app *application) userSingup(w http.ResponseWriter, r *http.Request) {
-    w.Write([]byte("singup"))
+func (app *application) userSignup(w http.ResponseWriter, r *http.Request) {
+    w.Write([]byte("signup"))
 }
 
-func (app *application) userSingupPost(w http.ResponseWriter, r *http.Request) {
-    w.Write([]byte("singup post"))
+func (app *application) userSignupPost(w http.ResponseWriter, r *http.Request) {
+    w.Write([]byte("signup post"))
 }
 
 func (app *application) userLogout(w http.ResponseWriter, r *http.Request) {
