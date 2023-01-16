@@ -3,17 +3,18 @@ package main
 import (
 	"net/http"
 
+	"github.com/NPeykov/snippetbox/ui"
 	"github.com/julienschmidt/httprouter"
 	"github.com/justinas/alice"
 )
 
 func (app *application) routes() http.Handler {
-    fileServer := http.FileServer(http.Dir("./ui/static/"))
+    fileServer := http.FileServer(http.FS(ui.Files))
     router := httprouter.New()
     router.NotFound = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {app.notFound(w)})
-    router.Handler(http.MethodGet, "/static/*filepath", http.StripPrefix("/static", fileServer))
+    router.Handler(http.MethodGet, "/static/*filepath", fileServer)
 
-    dynamic := alice.New(app.sessionManager.LoadAndSave)
+    dynamic := alice.New(app.sessionManager.LoadAndSave, noSurf, app.authenticate)
     protected := dynamic.Append(app.requireAuthentication)
 
 	router.Handler(http.MethodGet, "/", dynamic.ThenFunc(app.home))
