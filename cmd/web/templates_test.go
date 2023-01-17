@@ -1,8 +1,10 @@
 package main
 
 import (
-    "testing"
-    "time"
+	"testing"
+	"time"
+
+	"github.com/NPeykov/snippetbox/internal/assert"
 )
 
 func TestHumanData(t *testing.T) {
@@ -31,9 +33,7 @@ func TestHumanData(t *testing.T) {
     for _, test := range tests {
         t.Run(test.name, func(t *testing.T) {
             got := humanDate(test.tm)
-            if got != test.expect {
-                t.Errorf("got %q; want %q", got, test.expect)
-            }
+            assert.Equal(t, got, test.expect)
         })
     }
 }
