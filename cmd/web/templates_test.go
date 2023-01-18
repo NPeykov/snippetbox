@@ -7,7 +7,7 @@ import (
 	"github.com/NPeykov/snippetbox/internal/assert"
 )
 
-func TestHumanData(t *testing.T) {
+func TestHumanDate(t *testing.T) {
     tests := []struct {
         name string
         tm time.Time
