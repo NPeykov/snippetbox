@@ -43,6 +43,7 @@ func (app *application) requireAuthentication(next http.Handler) (http.Handler) 
         if !app.isAuthenticated(r) {
             app.sessionManager.Put(r.Context(), "urlToRedirectAfterLogin", r.URL.Path)
             http.Redirect(w, r, "/user/login", http.StatusSeeOther)
+            return
         }
         w.Header().Add("Cache-Control", "no-store")
         next.ServeHTTP(w, r) 
