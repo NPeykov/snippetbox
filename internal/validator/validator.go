@@ -62,3 +62,7 @@ func Matches(value string, rx *regexp.Regexp) bool {
     return rx.MatchString(value)
 }
 
+func MatchString(v string, s string) bool {
+    return v == s
+}
+
