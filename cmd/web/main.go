@@ -24,11 +24,13 @@ type application struct {
     templateCache map[string]*template.Template
     formDecoder *form.Decoder
     sessionManager *scs.SessionManager
+    debugMode bool
 }
 
 func main() {
-    addr := flag.String("addr", ":4000", "HTTP application port")
-    dsn  := flag.String("dsn", "web:1234@/snippetbox?parseTime=true", "HTTP application port")
+    addr  := flag.String("addr", ":4000", "HTTP application port")
+    dsn   := flag.String("dsn", "web:1234@/snippetbox?parseTime=true", "HTTP application port")
+    debugMode := flag.Bool("debug", false, "debug mode for sending errors responses")
     flag.Parse()
 
     infoLog := log.New(os.Stdout, "INFO\t", log.Ldate | log.Ltime)
@@ -60,6 +62,7 @@ func main() {
         templateCache: tmplCache,
         formDecoder: formDecoder,
         sessionManager: sessionManager,
+        debugMode: *debugMode,
     }
 
     srv := &http.Server{
