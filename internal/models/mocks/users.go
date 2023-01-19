@@ -1,8 +1,20 @@
 package mocks
 
-import "github.com/NPeykov/snippetbox/internal/models"
+import (
+	"time"
+
+	"github.com/NPeykov/snippetbox/internal/models"
+)
 
 type UserModel struct{}
+
+var mockUser = &models.User{
+    ID: 1, 
+    Username: "pkv", 
+    Email: "gg@gg.com", 
+    Hashed_password: []byte("$2a$12$AKCfdUHY.pHWtuiBi0FXl.97yMqVO8tm82qvpJCL/gG7Pqnwab/2K"),
+    Created: time.Now(),
+}
 
 func (m *UserModel) Insert(username, email, password string) error {
     switch email {
@@ -27,3 +39,13 @@ func (m *UserModel) Exists(id int) (bool, error) {
         return false, nil 
     }
 }
+
+func (m *UserModel) Get(id int) (*models.User, error) {
+    switch id {
+    case 1:
+        return mockUser, nil
+    default:
+        return nil, models.ErrNoRecord
+    }
+}
+

@@ -237,3 +237,24 @@ func (app *application) userLogout(w http.ResponseWriter, r *http.Request) {
 
     http.Redirect(w, r, "/", http.StatusSeeOther)
 }
+
+func (app *application) accountView(w http.ResponseWriter, r *http.Request) {
+    userID := app.sessionManager.GetInt(r.Context(), "authenticatedUserID")
+
+    user, err := app.users.Get(userID)
+
+    if err != nil {
+        if errors.Is(err, models.ErrNoRecord) {
+            http.Redirect(w, r, "/user/login", http.StatusSeeOther)
+        } else {
+            app.serverError(w, err)
+        }
+        return
+    }
+
+    tmplData := app.newTemplateData(r)
+    tmplData.User = user
+
+    app.render(w, http.StatusOK, "account.tmpl.html", tmplData)
+}
+
